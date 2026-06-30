@@ -1,0 +1,15 @@
+# Python and PyInstaller
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+
+# Project specific logs and sensitive data
+move_log.csv
+dry_run_results.txt
+dry_run_summary.txt
+flagged_for_review.txt
+
+# Archive
+archive/
