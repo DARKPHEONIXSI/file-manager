@@ -78,6 +78,47 @@ python organizer.py --project-dir "D:\coding\file manager" search --reindex
 Stage 6. Rebuild the index with `--reindex` after running `execute`, since
 file locations change.
 
+```
+python organizer.py --project-dir "D:\coding\file manager" dupes scan
+```
+Stage 7a. Read-only. Finds files with identical content (by size first, then
+SHA-256 hash — so two files only get flagged if they're byte-for-byte the
+same, never just same name). Writes `duplicates.json`. Skips the same
+excluded folders as `scan` (caches, `.git`, `node_modules`, game saves,
+etc.) so it never hashes huge app-managed folders.
+
+```
+python organizer.py --project-dir "D:\coding\file manager" dupes review
+python organizer.py --project-dir "D:\coding\file manager" dupes review --gui
+```
+Stage 7b. Lets you choose which copies to remove:
+- **No `--gui`**: reviews one duplicate group at a time in the terminal.
+  Shows you every copy (oldest marked as the recommended keeper), you type
+  which number to keep, confirm with `y`, and it moves the rest — one group
+  at a time, your decision applies immediately before moving to the next
+  group.
+- **`--gui`**: opens a single scrollable checklist window showing every
+  duplicate group at once, with the non-oldest copy in each group
+  pre-checked for removal. Adjust checkboxes as you like, then one
+  "Quarantine Selected" button processes everything you've checked in one
+  go. Requires `tkinter`, which ships with the standard Windows Python
+  installer — if it's missing, the command tells you and falls back to the
+  one-by-one terminal review instead.
+
+**Neither mode deletes anything.** Chosen copies are *moved* into a
+`_DuplicatesPendingDelete\` folder inside your project directory — you can
+still drag files back out of it by hand if you change your mind. Every move
+is logged to `duplicate_log.csv` before it happens, same as `execute`.
+
+```
+python organizer.py --project-dir "D:\coding\file manager" dupes purge
+```
+Stage 7c. The only irreversible step. Shows you exactly how many files and
+how much space are sitting in `_DuplicatesPendingDelete\`, then requires you
+to type `yes` before permanently deleting them. Skip the prompt with `--yes`
+if you're scripting it. This cannot be undone by the tool — once purged,
+the files are gone for real.
+
 ## 3. What's different from the original multi-script version
 
 - **One file, no hardcoded drive letters or usernames.** Everything machine-
@@ -95,6 +136,12 @@ file locations change.
 - Hidden/system-file detection works cross-platform (dotfiles on
   Mac/Linux, hidden/system attributes on Windows) instead of relying on a
   Windows-only API.
+- **New: duplicate detection and removal** (`dupes scan` / `dupes review`
+  [`--gui`] / `dupes purge`), not present in the original four scripts.
+  Deletion is two-stage by design — review quarantines (moves) files first,
+  purge is the only step that's actually irreversible — to match this
+  project's existing "never run a real action without a reviewable plan
+  first" rule.
 
 ## 4. Tested behavior
 

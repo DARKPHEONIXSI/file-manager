@@ -41,17 +41,19 @@ pyinstaller --onefile organizer.py
 
 ```powershell
 New-Item -ItemType Directory -Force -Path .\verify_sandbox\project | Out-Null
+New-Item -ItemType Directory -Force -Path .\verify_sandbox\data\.git | Out-Null
 New-Item -ItemType Directory -Force -Path .\verify_sandbox\data\loose_stuff | Out-Null
 New-Item -ItemType Directory -Force -Path .\verify_sandbox\data\node_modules\pkg | Out-Null
 New-Item -ItemType Directory -Force -Path ".\verify_sandbox\data\My Games\SomeGame\SaveGame" | Out-Null
 
+"test file 0" | Out-File .\verify_sandbox\data\.git\config
 "test file 1" | Out-File .\verify_sandbox\data\loose_stuff\report.txt
 "test file 2" | Out-File ".\verify_sandbox\data\My Games\SomeGame\SaveGame\save1.dat"
 "test file 3" | Out-File .\verify_sandbox\data\node_modules\pkg\index.js
 ```
 
-This creates one file that SHOULD get organized (`report.txt`) and two that
-SHOULD be excluded and left alone (`save1.dat` under `My Games`, `index.js`
+This creates one file that SHOULD get organized (`report.txt`) and three that
+SHOULD be excluded and left alone (`config` under `.git`, `save1.dat` under `My Games`, `index.js`
 under `node_modules`).
 
 ---
@@ -84,8 +86,8 @@ Get-Content .\verify_sandbox\project\flagged_for_review.txt
 **Pass condition — all of these must be true:**
 - `dry_run_results.txt` contains exactly one line, and it's `report.txt`
   with an `-> ... Organized\2026\...` destination.
-- `flagged_for_review.txt` contains the `node_modules` and `SaveGame`
-  folders with REASON text next to each.
+- `flagged_for_review.txt` contains the `.git`, `node_modules` and `SaveGame`
+  folders with REASON text next to each (e.g., "Hidden/system folder" for `.git`).
 - If `dry_run_results.txt` is empty or doesn't exist: STOP, the build is
   still broken.
 
